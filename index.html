@@ -26,6 +26,34 @@
         url: 'http://localhost:3000/articles'
       }).done(allArticlesCallback);
 
+      $('#new-article').on('submit', function(event){
+        var $form = $(event.target),
+          $title = $form.find("input[name='title']").val(),
+          $body = $form.find("input[name='body']").val(),
+          action = $form.attr('action');
+
+        event.preventDefault();
+
+        $.ajax({
+          url: action,
+          type: 'POST',
+          data: {
+            article: {
+            title: $title,
+            body: $body
+            }
+          },
+          success: function(article){
+            // Build the HTML for the article
+            var $articleHTML = $('<dt>').attr('id', article.id).text(article.title);
+            $articleHTML.append($('<dd>').text(article.body));
+
+            // Add the article to the article list
+            $('#articles').append($articleHTML);
+          }
+        }); // end ajax call
+      }); // end new-article
+
     }); //end document ready
   </script>
 </head>
@@ -39,6 +67,12 @@
   </div>
 
   <div id="msg"></div>
+
+  <form action="http://localhost:3000/articles" id="new-article">
+    <input type="text" name="title" placeholder="Enter a new title">
+    <input type="textarea" name="body" placeholder="Enter a new article">
+    <input type="submit" value="Create Article">
+  </form>
 
   <h3>Articles</h3>
   <dl id="articles">
