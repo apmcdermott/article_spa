@@ -2,40 +2,86 @@
 <head>
   <script src='js/jquery.js'></script>
   <script src='js/handlebars-v1.3.0.js'></script>
-  <!-- Create a Handlebars template -->
+  <script src="js/ajax_global_handlers.js" type="text/javascript" charset="utf-8"></script>
+
+  <!-- template for one article -->
   <script id="article-template" type="text/x-handlebars-template">
-    {{#each articles}}
-        <dt> Article Title: {{this.title}}</dt>
+    <dt><strong>{{title}}</strong></dt>
+    <dd>{{body}}</dd>
+  </script>
+
+  <!-- template for all articles -->
+  <script id="articles-template" type="text/x-handlebars-template">
+    {{#each returned_articles}}
+        <dt><strong>{{this.title}}</strong></dt>
         <dd>{{this.body}}</dd>
     {{/each}}
   </script>
 
   <script>
     $(document).ready(function(){
-      var articlesCallBackHandler = function(articles_result){
-        var articles = {articles: articles_result};
-        var article_source = $('#article-template').html();
-        var template = Handlebars.compile(article_source);
-        var articles_html = template(articles);
 
-        // insert the article in the list of articles
-        $('#articles').append(articles_html);
+      var buildArticleHTML = function(article, source){
+        var template = Handlebars.compile(source);
+        var article_html = template(article);
+        return article_html;
+      };
+
+      var oneArticleCallback = function(article){
+        var source = $('#article-template').html();
+        $('#articles').append(buildArticleHTML(article, source));
+      };
+
+      var allArticlesCallback = function(articles){
+        var all_articles = {returned_articles: articles};
+        var source = $('#articles-template').html();
+        $('#articles').append(buildArticleHTML(all_articles, source));
       };
 
       $.ajax({
         url: 'http://localhost:3000/articles'
-      }).done(articlesCallBackHandler);
+      }).done(allArticlesCallback);
+
+
+      $('#new-article').on('submit', function(event){
+        var $form = $(event.target),
+          $title = $form.find("input[name='title']").val(),
+          $body = $form.find("input[name='body']").val(),
+          action = $form.attr('action');
+        $('#form-title').val('');
+        $('#form-body').val('');
+
+        event.preventDefault();
+
+        $.ajax({
+          url: action,
+          type: 'POST',
+          data: {
+            article: {
+            title: $title,
+            body: $body
+            }
+          }
+        }).done(oneArticleCallback); // end ajax call
+      }); // end new-article
 
     });
   </script>
 </head>
 <body>
-  <h3>Simple HandleBars</h3>
+  <h2>Simple HandleBars</h2>
+
+  <form action="http://localhost:3000/articles" id="new-article">
+    <input type="text" name="title" id="form-title" placeholder="Enter a new title">
+    <input type="textarea" name="body" id="form-body" placeholder="Enter a new article">
+    <input type="submit" value="Create Article">
+  </form>
 
   <div id='container'>
 
     <!-- List of all the Articles -->
-    <dl id='articles'>Articles
+    <dl id='articles'>
+      <h3>Articles</h3>
     </dl>
 
   </div>
