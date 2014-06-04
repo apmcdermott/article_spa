@@ -1,0 +1,49 @@
+<html>
+
+<head>
+  <link rel="stylesheet" href="css/simple.css">
+  <script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/ajax_global_handlers.js" type="text/javascript" charset="utf-8"></script>
+  <script>
+    $(document).ready(function(){
+      // alert("Page loaded");
+
+      var allArticlesCallback = function(articles){
+        // console.log("Articles = " + articles);
+        articles.forEach(function(article){
+          var $articleHTML = $('<dt>').attr('id', article.id).text(article.title);
+
+          // Add the body in a dd tag
+          $articleHTML.append($('<dd>').text(article.body));
+
+          // Append articleHTML to id=articles
+          $('#articles').append($articleHTML);
+
+        }); //end forEach
+      }; // end allArticlesCallback
+
+      $.ajax({
+        url: 'http://localhost:3000/articles'
+      }).done(allArticlesCallback);
+
+    }); //end document ready
+  </script>
+</head>
+
+<body>
+  <h2>Articles SPA</h2>
+
+  <!-- Busy Spinner -->
+  <div id="ajaxSpinnerContainer" class="centered">
+    <img src="images/ajax-loader.gif" id="ajaxSpinnerImage" title="Working..." />
+  </div>
+
+  <div id="msg"></div>
+
+  <h3>Articles</h3>
+  <dl id="articles">
+
+  </dl>
+
+</body>
+</html>
